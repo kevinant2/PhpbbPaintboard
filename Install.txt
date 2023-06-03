@@ -1,0 +1,1824 @@
+PaintBoard Mod for Phpbb 3.3.10
+c 2023 by Kevin - kevinant@gmail.com
+http://drk.great-site.net/
+
+Please go to Admin Control Panel -> Forum -> Manage Forums -> Edit forums after installation . Choose the forum that you would like to make it a paintboard and check "Enabling Topic and Post forum View" and "Is this forum a paint board?" options.
+
+
+#
+#-----[ Upload the following files ]------------------------------------------
+#
+PaintBBS.jar
+PCHViewer.jar
+spainter_all.jar
+picpost.php
+paintbook.php
+Styles\ProSilver\template\paintbbs.html
+
+#
+#-----[ Make following change in control panel ]------------------------------------------
+#
+Control Panel - > Posting  -> Manage attachment extensions
+Allow .pch/.spch/.jpeg/.png/.jpg extensions. Make sure they are being added to images extensions group.
+
+#
+#-----[ SQL Query to be run ]------------------------------------------
+#
+Note: Replace phpbb_ with your phpbb's table prefix
+
+alter table phpbb_forums 
+add Enable_TopicPost_View int(11) NOT NULL DEFAULT 0,
+add PostTopicPadding_Width int(11) NOT NULL DEFAULT 60,
+add MaxPostPerTopic int(11) NOT NULL DEFAULT 10,
+add DisplayNewestPost int(11) NOT NULL DEFAULT 1,
+add ReplyRedirect int(11) NOT NULL DEFAULT 1,
+add IsPaintBoard int(11) NOT NULL DEFAULT 0,
+add MinDrawingTime int(11) NOT NULL DEFAULT 30,
+add LayersAllowed int(11) NOT NULL DEFAULT 3,
+add PicQuality int(11) NOT NULL DEFAULT 1,
+add UseJPEG int(11) NOT NULL DEFAULT 0,
+add JPEGCompLv int(11) NOT NULL DEFAULT 80,
+add MaxUndo int(11) NOT NULL DEFAULT 90,
+add UndoMG int(11) NOT NULL DEFAULT 45,
+add DrawAppletWidth int(11) NOT NULL DEFAULT 810,
+add DrawAppletHeight int(11) NOT NULL DEFAULT 560,
+add DefaultPicWidth int(11) NOT NULL DEFAULT 300,
+add DefaultPicHeight int(11) NOT NULL DEFAULT 300,
+add MaxPicWidth int(11) NOT NULL DEFAULT 800,
+add MaxPicHeight int(11) NOT NULL DEFAULT 800,
+add MinPicWidth int(11) NOT NULL DEFAULT 300,
+add MinPicHeight int(11) NOT NULL DEFAULT 300,
+add AllowAnimation int(11) NOT NULL DEFAULT 1,
+add DispWidth int(11) NOT NULL DEFAULT 300,
+add DispReplyAttach int(11) NOT NULL DEFAULT 0
+;
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+includes\acp\acp_forums.php
+#
+#-----[ FIND ]------------------------------------------
+# 
+'S_CAN_COPY_PERMISSIONS'	=> ($action != 'edit' || empty($forum_id) || ($auth->acl_get('a_fauth') && $auth->acl_get('a_authusers') && $auth->acl_get('a_authgroups') && $auth->acl_get('a_mauth'))) ? true : false,
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+					'S_Enable_TopicPost_View'	=> ($forum_data['Enable_TopicPost_View']) ? true : false,
+					'S_PostTopicPadding_Width'	=> $forum_data['PostTopicPadding_Width'],
+					'S_MaxPostPerTopic'			=> $forum_data['MaxPostPerTopic'],
+					'S_DisplayNewestPost'		=> $forum_data['DisplayNewestPost'],
+					'S_ReplyRedirect'			=> ($forum_data['ReplyRedirect']) ? true : false,
+					'S_IsPaintBoard'			=> ($forum_data['IsPaintBoard']) ? true : false,
+					'S_MinDrawingTime'			=> $forum_data['MinDrawingTime'],
+					'S_LayersAllowed'			=> $forum_data['LayersAllowed'],
+					'S_PicQuality'				=> $forum_data['PicQuality'],
+					'S_UseJPEG'					=> $forum_data['UseJPEG'],
+					'S_JPEGCompLv'				=> $forum_data['JPEGCompLv'],
+					'S_MaxUndo'					=> $forum_data['MaxUndo'],
+					'S_UndoMG'					=> $forum_data['UndoMG'],
+					'S_DrawAppletWidth'			=> $forum_data['DrawAppletWidth'],
+					'S_DrawAppletHeight'		=> $forum_data['DrawAppletHeight'],
+					'S_DefaultPicWidth'			=> $forum_data['DefaultPicWidth'],
+					'S_DefaultPicHeight'		=> $forum_data['DefaultPicHeight'],
+					'S_MaxPicWidth'				=> $forum_data['MaxPicWidth'],
+					'S_MaxPicHeight'			=> $forum_data['MaxPicHeight'],
+					'S_MinPicWidth'				=> $forum_data['MinPicWidth'],
+					'S_MinPicHeight'			=> $forum_data['MinPicHeight'],
+					'S_AllowAnimation'			=> ($forum_data['AllowAnimation']) ? true : false,
+					'S_DispWidth'				=> $forum_data['DispWidth'],
+					'S_DispReplyAttach'			=> $forum_data['DispReplyAttach'],
+					
+#
+#-----[ FIND ]------------------------------------------
+# 
+'forum_password_confirm'=> '',
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+							'Enable_TopicPost_View'	=> 0,
+							'PostTopicPadding_Width'=> 60,
+							'MaxPostPerTopic'		=> 10,
+							'DisplayNewestPost'		=> 1,
+							'ReplyRedirect'			=> 1,
+							'IsPaintBoard'			=> 0,
+							'MinDrawingTime'		=> 30,
+							'LayersAllowed'			=> 3,
+							'PicQuality'			=> 1,
+							'UseJPEG'				=> 0,
+							'JPEGCompLv'			=> 80,
+							'MaxUndo'				=> 90,
+							'UndoMG'				=> 45,
+							'DrawAppletWidth'		=> 810,
+							'DrawAppletHeight'		=> 560,
+							'DefaultPicWidth'		=> 300,
+							'DefaultPicHeight'		=> 300,
+							'MaxPicWidth'			=> 800,
+							'MaxPicHeight'			=> 800,
+							'MinPicWidth'			=> 300,
+							'MinPicHeight'			=> 300,
+							'AllowAnimation'		=> 1,
+							'DispWidth'				=> 300,
+							'DispReplyAttach'		=> 0,
+
+#
+#-----[ FIND ]---------------------------------------------
+# 
+'forum_password_unset'	=> $request->variable('forum_password_unset', false),
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+						'Enable_TopicPost_View'	=> $request->variable('Enable_TopicPost_View', false),
+						'PostTopicPadding_Width'=> $request->variable('PostTopicPadding_Width', 60),
+						'MaxPostPerTopic'		=> $request->variable('MaxPostPerTopic', 10),
+						'DisplayNewestPost'		=> $request->variable('DisplayNewestPost', 1),
+						'ReplyRedirect'			=> $request->variable('ReplyRedirect', 1),
+						'IsPaintBoard'			=> $request->variable('IsPaintBoard', false),
+						'MinDrawingTime'		=> $request->variable('MinDrawingTime', 30),
+						'LayersAllowed'			=> $request->variable('LayersAllowed', 3),
+						'PicQuality'			=> $request->variable('PicQuality', 1),
+						'UseJPEG'				=> $request->variable('UseJPEG', false),
+						'JPEGCompLv'			=> $request->variable('JPEGCompLv', 80),
+						'MaxUndo'				=> $request->variable('MaxUndo', 90),
+						'UndoMG'				=> $request->variable('UndoMG', 45),
+						'DrawAppletWidth'		=> $request->variable('DrawAppletWidth', 810),
+						'DrawAppletHeight'		=> $request->variable('DrawAppletHeight', 560),
+						'DefaultPicWidth'		=> $request->variable('DefaultPicWidth', 300),
+						'DefaultPicHeight'		=> $request->variable('DefaultPicHeight', 300),
+						'MaxPicWidth'			=> $request->variable('MaxPicWidth', 800),
+						'MaxPicHeight'			=> $request->variable('MaxPicHeight', 800),
+						'MinPicWidth'			=> $request->variable('MinPicWidth', 300),
+						'MinPicHeight'			=> $request->variable('MinPicHeight', 300),
+						'AllowAnimation'		=> $request->variable('AllowAnimation', true),
+						'DispWidth'		=> $request->variable('DispWidth', 300),
+						'DispReplyAttach'		=> $request->variable('DispReplyAttach', false),
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+adm\style\acp_forums.html
+
+#
+#-----[ FIND ]---------------------------------------------
+# 
+		<!-- EVENT acp_forums_rules_settings_append -->
+		</fieldset>
+	</div>
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+	<div id="forum_posttopic_display">
+		<fieldset>
+			<legend>{L_PostTopicDisp}</legend>
+		<dl>
+			<dt><label for="Enable_TopicPost_View">{L_Enable_TopicPost_View}{L_COLON}</label><br /><span>{L_Enable_TopicPost_View_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="Enable_TopicPost_View" value="1"<!-- IF S_Enable_TopicPost_View --> id="Enable_TopicPost_View" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="Enable_TopicPost_View" value="0"<!-- IF not S_Enable_TopicPost_View --> id="Enable_TopicPost_View" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>		
+		<dl>
+			<dt><label for="PostTopicPadding_Width">{L_PostTopicPadding_Width}:</label><br /><span>{L_PostTopicPadding_Width_EXPLAIN}</span></dt>
+			<dd><input id="PostTopicPadding_Width" type="number" min="0" max="9999" name="PostTopicPadding_Width" value="{S_PostTopicPadding_Width}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MaxPostPerTopic">{L_MaxPostPerTopic}:</label><br /><span>{L_MaxPostPerTopic_EXPLAIN}</span></dt>
+			<dd><input id="MaxPostPerTopic" type="number" min="0" max="9999" name="MaxPostPerTopic" value="{S_MaxPostPerTopic}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="DisplayNewestPost">{L_DisplayNewestPost}:</label><br /><span>{L_DisplayNewestPost_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="DisplayNewestPost" value="1"<!-- IF S_DisplayNewestPost --> id="DisplayNewestPost" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="DisplayNewestPost" value="0"<!-- IF not S_DisplayNewestPost --> id="DisplayNewestPost" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>
+		<dl>
+			<dt><label for="ReplyRedirect">{L_ReplyRedirect}:</label><br /><span>{L_ReplyRedirect_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="ReplyRedirect" value="1"<!-- IF S_ReplyRedirect --> id="ReplyRedirect" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="ReplyRedirect" value="0"<!-- IF not S_ReplyRedirect --> id="ReplyRedirect" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>
+		<dl>
+			<dt><label for="DispReplyAttach">{L_DispReplyAttach}:</label><br /><span>{L_DispReplyAttach_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="DispReplyAttach" value="1"<!-- IF S_DispReplyAttach --> id="DispReplyAttach" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="DispReplyAttach" value="0"<!-- IF not S_DispReplyAttach --> id="DispReplyAttach" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>
+		</fieldset>
+	</div>
+
+	<div id="forum_paintbbs">
+
+
+		<fieldset>
+			<legend>{L_PaintBBSSetting}</legend>
+		<dl>
+			<dt><label for="IsPaintBoard">{L_IsPaintBoard}{L_COLON}</label><br /><span>{L_IsPaintBoard_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="IsPaintBoard" value="1"<!-- IF S_IsPaintBoard --> id="IsPaintBoard" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="IsPaintBoard" value="0"<!-- IF not S_IsPaintBoard --> id="IsPaintBoard" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>		
+		<dl>
+			<dt><label for="DispWidth">{L_DispWidth}:</label><br /><span>{L_DispWidth_EXPLAIN}</span></dt>
+			<dd><input id="DispWidth" type="number" min="0" max="9999" name="DispWidth" value="{S_DispWidth}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MinDrawingTime">{L_MinDrawingTime}:</label><br /><span>{L_MinDrawingTime_EXPLAIN}</span></dt>
+			<dd><input id="MinDrawingTime" type="number" min="0" max="9999" name="MinDrawingTime" value="{S_MinDrawingTime}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="AllowAnimation">{L_AllowAnimation}:</label><br /><span>{L_AllowAnimation_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="AllowAnimation" value="1"<!-- IF S_AllowAnimation --> id="AllowAnimation" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="AllowAnimation" value="0"<!-- IF not S_AllowAnimation --> id="AllowAnimation" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>
+		<dl>
+			<dt><label for="LayersAllowed">{L_LayersAllowed}:</label><br /><span>{L_LayersAllowed_EXPLAIN}</span></dt>
+			<dd><input id="LayersAllowed" type="number" min="0" max="9999" name="LayersAllowed" value="{S_LayersAllowed}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="PicQuality">{L_PicQuality}:</label><br /><span>{L_PicQuality_EXPLAIN}</span></dt>
+			<dd><input id="PicQuality" type="number" min="0" max="9999" name="PicQuality" value="{S_PicQuality}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="UseJPEG">{L_UseJPEG}:</label><br /><span>{L_UseJPEG_EXPLAIN}</span></dt>
+			<dd><label><input type="radio" class="radio" name="UseJPEG" value="1"<!-- IF S_UseJPEG --> id="UseJPEG" checked="checked"<!-- ENDIF --> /> {L_YES}</label>
+				<label><input type="radio" class="radio" name="UseJPEG" value="0"<!-- IF not S_UseJPEG --> id="UseJPEG" checked="checked"<!-- ENDIF --> /> {L_NO}</label></dd>
+		</dl>
+		<dl>
+			<dt><label for="JPEGCompLv">{L_JPEGCompLv}:</label><br /><span>{L_JPEGCompLv_EXPLAIN}</span></dt>
+			<dd><input id="JPEGCompLv" type="number" min="0" max="100" name="JPEGCompLv" value="{S_JPEGCompLv}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MaxUndo">{L_MaxUndo}:</label><br /><span>{L_MaxUndo_EXPLAIN}</span></dt>
+			<dd><input id="MaxUndo" type="number" min="0" max="9999" name="MaxUndo" value="{S_MaxUndo}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="UndoMG">{L_UndoMG}:</label><br /><span>{L_UndoMG_EXPLAIN}</span></dt>
+			<dd><input id="UndoMG" type="number" min="0" max="9999" name="UndoMG" value="{S_UndoMG}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="DrawAppletWidth">{L_DrawAppletWidth}:</label><br /><span>{L_DrawAppletWidth_EXPLAIN}</span></dt>
+			<dd><input id="DrawAppletWidth" type="number" min="0" max="9999" name="DrawAppletWidth" value="{S_DrawAppletWidth}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="DrawAppletHeight">{L_DrawAppletHeight}:</label><br /><span>{L_DrawAppletHeight_EXPLAIN}</span></dt>
+			<dd><input id="DrawAppletHeight" type="number" min="0" max="9999" name="DrawAppletHeight" value="{S_DrawAppletHeight}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="DefaultPicWidth">{L_DefaultPicWidth}:</label><br /><span>{L_DefaultPicWidth_EXPLAIN}</span></dt>
+			<dd><input id="DefaultPicWidth" type="number" min="0" max="9999" name="DefaultPicWidth" value="{S_DefaultPicWidth}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="DefaultPicHeight">{L_DefaultPicHeight}:</label><br /><span>{L_DefaultPicHeight_EXPLAIN}</span></dt>
+			<dd><input id="DefaultPicHeight" type="number" min="0" max="9999" name="DefaultPicHeight" value="{S_DefaultPicHeight}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MaxPicWidth">{L_MaxPicWidth}:</label><br /><span>{L_MaxPicWidth_EXPLAIN}</span></dt>
+			<dd><input id="MaxPicWidth" type="number" min="0" max="9999" name="MaxPicWidth" value="{S_MaxPicWidth}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MaxPicHeight">{L_MaxPicHeight}:</label><br /><span>{L_MaxPicHeight_EXPLAIN}</span></dt>
+			<dd><input id="MaxPicHeight" type="number" min="0" max="9999" name="MaxPicHeight" value="{S_MaxPicHeight}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MinPicWidth">{L_MinPicWidth}:</label><br /><span>{L_MinPicWidth_EXPLAIN}</span></dt>
+			<dd><input id="MinPicWidth" type="number" min="0" max="9999" name="MinPicWidth" value="{S_MinPicWidth}" /> </dd>
+		</dl>
+		<dl>
+			<dt><label for="MinPicHeight">{L_MinPicHeight}:</label><br /><span>{L_MinPicHeight_EXPLAIN}</span></dt>
+			<dd><input id="MinPicHeight" type="number" min="0" max="9999" name="MinPicHeight" value="{S_MinPicHeight}" /> </dd>
+		</dl>
+
+
+		</fieldset>
+	</div>
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+language\en\acp\forums.php
+#
+#-----[ FIND ]---------------------------------------------
+# 
+'UNLOCKED'			=> 'Unlocked',
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+	'PostTopicDisp'						=>	'Post and Topic Display',
+	'Enable_TopicPost_View'				=>	'Enabling Topic and Post forum View',
+	'Enable_TopicPost_View_EXPLAIN'		=>	'Transform Forum view to display both topic and posts instead of topic listing.',
+	'PostTopicPadding_Width'				=>	'Padding Width of Post and Topic Display',
+	'PostTopicPadding_Width_EXPLAIN'		=>	'Padding Width for the Posts in the Post and Topic Display.',
+	'MaxPostPerTopic'				=>	'Maximum Post per Topic',
+	'MaxPostPerTopic_EXPLAIN'		=>	'Maximum number of posts displayed per topic under Post and Topic forum display.',
+	'DisplayNewestPost'				=>	'Display Newest Post',
+	'DisplayNewestPost_EXPLAIN'		=>	'Display newest post of a topic under forum view.',
+	'ReplyRedirect'				=>	'Redirect to Forum view on Post',
+	'ReplyRedirect_EXPLAIN'		=>	'After posting reply , redirect to forum view instead of topic view.',
+	'DispReplyAttach'				=>	'Display Reply Attachments',
+	'DispReplyAttach_EXPLAIN'		=>	'Display Attachments in Reply Posts under this Topic and Post forum View.',
+	'L_PaintBBSSetting'				=>	'Paint board settings',
+	'IsPaintBoard'				=>	'Is this forum a paint board?',
+	'IsPaintBoard_EXPLAIN'		=>	'Check this if this forum is a paint board.',
+	'DispWidth'					=>	'Paint Board Picture Display Width',
+	'DispWidth_EXPLAIN'			=>	'Display Width of the picture on the paintbook page.',
+	'MinDrawingTime'				=>	'Minimum Drawing Time',
+	'MinDrawingTime_EXPLAIN'		=>	'Minimum required drawing time in seconds for the picture to be posted.',
+	'AllowAnimation'				=>	'Allow Animation',
+	'AllowAnimation_EXPLAIN'		=>	'Gives user option to record animation of painting progress?',
+	'LayersAllowed'				=>	'Number of layers allowed in the picture',
+	'LayersAllowed_EXPLAIN'		=>	'This is number of layers that are allowed in the painting.',
+	'PicQuality'				=>	'Picture Quality',
+	'PicQuality_EXPLAIN'		=>	'Canvas quality choices (1-4). Do not touch if you are not sure, as it may run out of memory.',
+	'UseJPEG'				=>	'Use JPEG compression instead of PNG',
+	'UseJPEG_EXPLAIN'		=>	'Using JPEG compression instead of PNG. ',
+	'JPEGCompLv'				=>	'JPEG Compression Quality',
+	'JPEGCompLv_EXPLAIN'		=>	'Quality of JPEG Compression. 0 is lowest and 100 is highest quality.',
+	'MaxUndo'				=>	'Maximum number of undo allowed',
+	'MaxUndo_EXPLAIN'		=>	'Maximum number of undo allowed in the painting.',
+	'UndoMG'				=>	'Number of undos to be bundled',
+	'UndoMG_EXPLAIN'		=>	'',
+	'DrawAppletWidth'				=>	'Drawing Applet Width',
+	'DrawAppletWidth_EXPLAIN'		=>	'',
+	'DrawAppletHeight'				=>	'Drawing Applet Height',
+	'DrawAppletHeight_EXPLAIN'		=>	'',
+	'DefaultPicWidth'				=>	'Default Picture Width',
+	'DefaultPicWidth_EXPLAIN'		=>	'',
+	'DefaultPicHeight'				=>	'Default Picture Height',
+	'DefaultPicHeight_EXPLAIN'		=>	'',
+	'MaxPicWidth'				=>	'Maximum Picture Width',
+	'MaxPicWidth_EXPLAIN'		=>	'',
+	'MaxPicHeight'				=>	'Maximum Picture Height',
+	'MaxPicHeight_EXPLAIN'		=>	'',
+	'MinPicWidth'				=>	'Minimum Picture Width',
+	'MinPicWidth_EXPLAIN'		=>	'',
+	'MinPicHeight'				=>	'Minimum Picture Height',
+	'MinPicHeight_EXPLAIN'		=>	'',
+	
+#
+#-----[ OPEN ]------------------------------------------
+#
+viewforum.php
+#
+#-----[ FIND ]------------------------------------------
+# 
+'S_VIEWFORUM'			=> true,
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+	'S_PAINTBBS'			=> ($forum_data['IsPaintBoard']) ? true : false,
+	'S_TopicPostView'		=> ($forum_data['Enable_TopicPost_View']) ? true : false,
+	'S_PAINTBBSAction'		=> append_sid("{$phpbb_root_path}paintbook.$phpEx", "f=$forum_id" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : '') . (($start == 0) ? '' : "&amp;start=$start")),
+	'U_POST_NEW_TOPICPOST'		=> ($auth->acl_get('f_post', $forum_id) || $user->data['user_id'] == ANONYMOUS) ? append_sid("{$phpbb_root_path}posting.$phpEx", 'mode=post&amp;spflag=topicpost&amp;f=' . $forum_id) : '',
+	'S_DefaultPicWidth'			=> ($forum_data['DefaultPicWidth']),
+	'S_DefaultPicHeight'			=> ($forum_data['DefaultPicHeight']),
+	'S_MinPicWidth'			=> ($forum_data['MinPicWidth']),
+	'S_MinPicHeight'			=> ($forum_data['MinPicHeight']),
+	'S_MaxPicWidth'			=> ($forum_data['MaxPicWidth']),
+	'S_MaxPicHeight'			=> ($forum_data['MaxPicHeight']),
+	'S_DispWidth'			=> ($forum_data['DispWidth']),
+	'S_PostTopicPadding_Width'			=> ($forum_data['PostTopicPadding_Width']),	
+	'S_AllowAnimation'			=> ($forum_data['AllowAnimation']) ? true : false,	
+	'S_ReplyRedirect'		=> ($forum_data['ReplyRedirect']) ? true : false,	
+
+#
+#-----[ FIND ]------------------------------------------
+# 
+$topic_tracking_info = $tracking_topics = array();
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+/** Get Attachments 
+**/
+$FirstPostList=array();
+$FirstPostText=array();
+foreach ($topic_list as $topic_id)
+{
+	$FirstPostList[]=$rowset[$topic_id]['topic_first_post_id'];
+}
+
+if (($forum_data['IsPaintBoard'] || !$forum_data['DispReplyAttach'])&& count($FirstPostList)>0)
+{
+	$WhereAttachSQL=$db->sql_in_set('post_msg_id', $FirstPostList);
+}
+else
+{
+	if (count($topic_list)>0)
+	{
+		$WhereAttachSQL=$db->sql_in_set('topic_id', $topic_list);
+	}
+}
+$EnablePostView=$forum_data['Enable_TopicPost_View'];
+if ($auth->acl_get('u_download') && $auth->acl_get('f_download', $forum_id) && count($topic_list)>0 && $EnablePostView==1)
+{
+	$sql = 'SELECT *
+		FROM ' . ATTACHMENTS_TABLE . '
+		WHERE ' . $WhereAttachSQL . '
+			AND in_message = 0
+		ORDER BY attach_id DESC, post_msg_id ASC';
+	$result = $db->sql_query($sql);
+
+	while ($row = $db->sql_fetchrow($result))
+	{
+		$attachments[$row['post_msg_id']][] = $row;
+	}
+	$db->sql_freeresult($result);
+}
+
+/** Get Posts
+**/
+// Holding maximum post time for marking topic read
+// We need to grab it because we do reverse ordering sometimes
+/*
+$max_post_time = 0;
+*/
+$firstonly=0;
+if (($firstonly>0 || $forum_data['MaxPostPerTopic']<1)&&count($FirstPostList)>0)
+{
+	$WherePostSQL=$db->sql_in_set('p.post_id', $FirstPostList);
+}
+else
+{
+	if (count($topic_list)>0)
+	{
+	$WherePostSQL=$db->sql_in_set('p.topic_id', $topic_list);
+	}
+}
+if(count($topic_list)>0 && $EnablePostView==1)
+{
+	$sql_ary = array(
+		'SELECT'	=> 'u.*, z.friend, z.foe, p.*',
+
+		'FROM'		=> array(
+			USERS_TABLE		=> 'u',
+			POSTS_TABLE		=> 'p',
+		),
+
+		'LEFT_JOIN'	=> array(
+			array(
+				'FROM'	=> array(ZEBRA_TABLE => 'z'),
+				'ON'	=> 'z.user_id = ' . $user->data['user_id'] . ' AND z.zebra_id = p.poster_id',
+			),
+		),
+
+		'WHERE'		=> $WherePostSQL . '
+			AND u.user_id = p.poster_id',
+	);
+
+	/**
+	* Event to modify the SQL query before the post and poster data is retrieved
+	*
+	* @event core.viewtopic_get_post_data
+	* @var	int		forum_id	Forum ID
+	* @var	int		topic_id	Topic ID
+	* @var	array	topic_data	Array with topic data
+	* @var	array	post_list	Array with post_ids we are going to retrieve
+	* @var	int		sort_days	Display posts of previous x days
+	* @var	string	sort_key	Key the posts are sorted by
+	* @var	string	sort_dir	Direction the posts are sorted by
+	* @var	int		start		Pagination information
+	* @var	array	sql_ary		The SQL array to get the data of posts and posters
+	* @since 3.1.0-a1
+	* @changed 3.1.0-a2 Added vars forum_id, topic_id, topic_data, post_list, sort_days, sort_key, sort_dir, start
+	*/
+	$vars = array(
+		'forum_id',
+		'topic_id',
+		'topic_data',
+		'post_list',
+		'sort_days',
+		'sort_key',
+		'sort_dir',
+		'start',
+		'sql_ary',
+	);
+
+	//extract($phpbb_dispatcher->trigger_event('core.viewtopic_get_post_data', compact($vars)));
+
+	$sql = $db->sql_build_query('SELECT', $sql_ary);
+	$result = $db->sql_query($sql);
+
+	$now = $user->create_datetime();
+	$now = phpbb_gmgetdate($now->getTimestamp() + $now->getOffset());
+
+	// Posts are stored in the $rowset array while $attach_list, $user_cache
+	// and the global bbcode_bitfield are built
+	while ($row = $db->sql_fetchrow($result))
+	{
+		// Set max_post_time
+		/*
+		if ($row['post_time'] > $max_post_time)
+		{
+			$max_post_time = $row['post_time'];
+		}
+		*/
+
+		$poster_id = (int) $row['poster_id'];
+
+		// Does post have an attachment? If so, add it to the list
+		if ($row['post_attachment'] && $config['allow_attachments'])
+		{
+			$attach_list[] = (int) $row['post_id'];
+
+			if ($row['post_visibility'] == ITEM_UNAPPROVED || $row['post_visibility'] == ITEM_REAPPROVE)
+			{
+				$has_unapproved_attachments = true;
+			}
+			else if ($row['post_visibility'] == ITEM_APPROVED)
+			{
+				$has_approved_attachments = true;
+			}
+		}
+
+		$rowset_data = array(
+			'hide_post'			=> (($row['foe'] || $row['post_visibility'] == ITEM_DELETED) && ($view != 'show' || $post_id != $row['post_id'])) ? true : false,
+
+			'post_id'			=> $row['post_id'],
+			'post_time'			=> $row['post_time'],
+			'user_id'			=> $row['user_id'],
+			'username'			=> $row['username'],
+			'user_colour'		=> $row['user_colour'],
+			'topic_id'			=> $row['topic_id'],
+			'forum_id'			=> $row['forum_id'],
+			'post_subject'		=> $row['post_subject'],
+			'post_edit_count'	=> $row['post_edit_count'],
+			'post_edit_time'	=> $row['post_edit_time'],
+			'post_edit_reason'	=> $row['post_edit_reason'],
+			'post_edit_user'	=> $row['post_edit_user'],
+			'post_edit_locked'	=> $row['post_edit_locked'],
+			'post_delete_time'	=> $row['post_delete_time'],
+			'post_delete_reason'=> $row['post_delete_reason'],
+			'post_delete_user'	=> $row['post_delete_user'],
+
+			// Make sure the icon actually exists
+			'icon_id'			=> (isset($icons[$row['icon_id']]['img'], $icons[$row['icon_id']]['height'], $icons[$row['icon_id']]['width'])) ? $row['icon_id'] : 0,
+			'post_attachment'	=> $row['post_attachment'],
+			'post_visibility'	=> $row['post_visibility'],
+			'post_reported'		=> $row['post_reported'],
+			'post_username'		=> $row['post_username'],
+			'post_text'			=> $row['post_text'],
+			'bbcode_uid'		=> $row['bbcode_uid'],
+			'bbcode_bitfield'	=> $row['bbcode_bitfield'],
+			'enable_smilies'	=> $row['enable_smilies'],
+			'enable_sig'		=> $row['enable_sig'],
+			'friend'			=> $row['friend'],
+			'foe'				=> $row['foe'],
+		);
+
+		/**
+		* Modify the post rowset containing data to be displayed with posts
+		*
+		* @event core.viewtopic_post_rowset_data
+		* @var	array	rowset_data	Array with the rowset data for this post
+		* @var	array	row			Array with original user and post data
+		* @since 3.1.0-a1
+		*/
+		$vars = array('rowset_data', 'row');
+		extract($phpbb_dispatcher->trigger_event('core.viewtopic_post_rowset_data', compact($vars)));
+
+		//$rowset[$row['post_id']] = $rowset_data;
+
+		// Cache various user specific data ... so we don't have to recompute
+		// this each time the same user appears on this page
+		if (!isset($user_cache[$poster_id]))
+		{
+			if ($poster_id == ANONYMOUS)
+			{
+				$user_cache_data = array(
+					'user_type'		=> USER_IGNORE,
+					'joined'		=> '',
+					'posts'			=> '',
+
+					'sig'					=> '',
+					'sig_bbcode_uid'		=> '',
+					'sig_bbcode_bitfield'	=> '',
+
+					'online'			=> false,
+					'avatar'			=> ($user->optionget('viewavatars')) ? phpbb_get_user_avatar($row) : '',
+					'rank_title'		=> '',
+					'rank_image'		=> '',
+					'rank_image_src'	=> '',
+					'pm'				=> '',
+					'email'				=> '',
+					'jabber'			=> '',
+					'search'			=> '',
+					'age'				=> '',
+
+					'username'			=> $row['username'],
+					'user_colour'		=> $row['user_colour'],
+					'contact_user'		=> '',
+
+					'warnings'			=> 0,
+					'allow_pm'			=> 0,
+				);
+
+				/**
+				* Modify the guest user's data displayed with the posts
+				*
+				* @event core.viewtopic_cache_guest_data
+				* @var	array	user_cache_data	Array with the user's data
+				* @var	int		poster_id		Poster's user id
+				* @var	array	row				Array with original user and post data
+				* @since 3.1.0-a1
+				*/
+				$vars = array('user_cache_data', 'poster_id', 'row');
+				extract($phpbb_dispatcher->trigger_event('core.viewtopic_cache_guest_data', compact($vars)));
+
+				$user_cache[$poster_id] = $user_cache_data;
+
+				$user_rank_data = phpbb_get_user_rank($row, false);
+				$user_cache[$poster_id]['rank_title'] = $user_rank_data['title'];
+				$user_cache[$poster_id]['rank_image'] = $user_rank_data['img'];
+				$user_cache[$poster_id]['rank_image_src'] = $user_rank_data['img_src'];
+			}
+			else
+			{
+				$user_sig = '';
+
+				// We add the signature to every posters entry because enable_sig is post dependent
+				if ($row['user_sig'] && $config['allow_sig'] && $user->optionget('viewsigs'))
+				{
+					$user_sig = $row['user_sig'];
+				}
+
+				$id_cache[] = $poster_id;
+
+				$user_cache_data = array(
+					'user_type'					=> $row['user_type'],
+					'user_inactive_reason'		=> $row['user_inactive_reason'],
+
+					'joined'		=> $user->format_date($row['user_regdate']),
+					'posts'			=> $row['user_posts'],
+					'warnings'		=> (isset($row['user_warnings'])) ? $row['user_warnings'] : 0,
+
+					'sig'					=> $user_sig,
+					'sig_bbcode_uid'		=> (!empty($row['user_sig_bbcode_uid'])) ? $row['user_sig_bbcode_uid'] : '',
+					'sig_bbcode_bitfield'	=> (!empty($row['user_sig_bbcode_bitfield'])) ? $row['user_sig_bbcode_bitfield'] : '',
+
+					'viewonline'	=> $row['user_allow_viewonline'],
+					'allow_pm'		=> $row['user_allow_pm'],
+
+					'avatar'		=> ($user->optionget('viewavatars')) ? phpbb_get_user_avatar($row) : '',
+					'age'			=> '',
+
+					'rank_title'		=> '',
+					'rank_image'		=> '',
+					'rank_image_src'	=> '',
+
+					'username'			=> $row['username'],
+					'user_colour'		=> $row['user_colour'],
+					'contact_user' 		=> $user->lang('CONTACT_USER', get_username_string('username', $poster_id, $row['username'], $row['user_colour'], $row['username'])),
+
+					'online'		=> false,
+					'jabber'		=> ($config['jab_enable'] && $row['user_jabber'] && $auth->acl_get('u_sendim')) ? append_sid("{$phpbb_root_path}memberlist.$phpEx", "mode=contact&amp;action=jabber&amp;u=$poster_id") : '',
+					'search'		=> ($config['load_search'] && $auth->acl_get('u_search')) ? append_sid("{$phpbb_root_path}search.$phpEx", "author_id=$poster_id&amp;sr=posts") : '',
+
+					'author_full'		=> get_username_string('full', $poster_id, $row['username'], $row['user_colour']),
+					'author_colour'		=> get_username_string('colour', $poster_id, $row['username'], $row['user_colour']),
+					'author_username'	=> get_username_string('username', $poster_id, $row['username'], $row['user_colour']),
+					'author_profile'	=> get_username_string('profile', $poster_id, $row['username'], $row['user_colour']),
+				);
+
+				/**
+				* Modify the users' data displayed with their posts
+				*
+				* @event core.viewtopic_cache_user_data
+				* @var	array	user_cache_data	Array with the user's data
+				* @var	int		poster_id		Poster's user id
+				* @var	array	row				Array with original user and post data
+				* @since 3.1.0-a1
+				*/
+				$vars = array('user_cache_data', 'poster_id', 'row');
+				extract($phpbb_dispatcher->trigger_event('core.viewtopic_cache_user_data', compact($vars)));
+
+				$user_cache[$poster_id] = $user_cache_data;
+
+				$user_rank_data = phpbb_get_user_rank($row, $row['user_posts']);
+				$user_cache[$poster_id]['rank_title'] = $user_rank_data['title'];
+				$user_cache[$poster_id]['rank_image'] = $user_rank_data['img'];
+				$user_cache[$poster_id]['rank_image_src'] = $user_rank_data['img_src'];
+
+				if ((!empty($row['user_allow_viewemail']) && $auth->acl_get('u_sendemail')) || $auth->acl_get('a_email'))
+				{
+					$user_cache[$poster_id]['email'] = ($config['board_email_form'] && $config['email_enable']) ? append_sid("{$phpbb_root_path}memberlist.$phpEx", "mode=email&amp;u=$poster_id") : (($config['board_hide_emails'] && !$auth->acl_get('a_email')) ? '' : 'mailto:' . $row['user_email']);
+				}
+				else
+				{
+					$user_cache[$poster_id]['email'] = '';
+				}
+
+				if ($config['allow_birthdays'] && !empty($row['user_birthday']))
+				{
+					list($bday_day, $bday_month, $bday_year) = array_map('intval', explode('-', $row['user_birthday']));
+
+					if ($bday_year)
+					{
+						$diff = $now['mon'] - $bday_month;
+						if ($diff == 0)
+						{
+							$diff = ($now['mday'] - $bday_day < 0) ? 1 : 0;
+						}
+						else
+						{
+							$diff = ($diff < 0) ? 1 : 0;
+						}
+
+						$user_cache[$poster_id]['age'] = (int) ($now['year'] - $bday_year - $diff);
+					}
+				}
+			}
+		}
+		$view		= $request->variable('view', '');
+		$parse_flags = ($row['bbcode_bitfield'] ? OPTION_FLAG_BBCODE : 0) | OPTION_FLAG_SMILIES;
+		$message = generate_text_for_display($row['post_text'], $row['bbcode_uid'], $row['bbcode_bitfield'], $parse_flags, true);
+
+
+		// Only display the quote button if the post is quotable.  Posts not approved are not quotable.
+
+
+	
+		$topic_data=$rowset[$row['topic_id']];
+		$post_unread = (isset($topic_tracking_info[$topic_id]) && $row['post_time'] > $topic_tracking_info[$topic_id]) ? true : false;
+		$s_cannot_edit = !$auth->acl_get('f_edit', $forum_id) || $user->data['user_id'] != $poster_id;
+		$s_cannot_edit_time = $config['edit_time'] && $row['post_time'] <= time() - ($config['edit_time'] * 60);
+		$s_cannot_edit_locked = ($topic_data['topic_status'] == ITEM_LOCKED && !$auth->acl_get('m_lock', $forum_id)) || $row['post_edit_locked'];
+
+		$s_cannot_delete = $user->data['user_id'] != $poster_id || (
+				!$auth->acl_get('f_delete', $forum_id) &&
+				(!$auth->acl_get('f_softdelete', $forum_id) || $row['post_visibility'] == ITEM_DELETED)
+		);
+		$s_cannot_delete_lastpost = $topic_data['topic_last_post_id'] != $row['post_id'];
+		$s_cannot_delete_time = $config['delete_time'] && $row['post_time'] <= time() - ($config['delete_time'] * 60);
+		// we do not want to allow removal of the last post if a moderator locked it!
+		$s_cannot_delete_locked = $topic_data['topic_status'] == ITEM_LOCKED || $row['post_edit_locked'];
+		$force_edit_allowed = $force_delete_allowed = $force_softdelete_allowed = false;
+		$edit_allowed = $force_edit_allowed || ($user->data['is_registered'] && ($auth->acl_get('m_edit', $forum_id) || (
+			!$s_cannot_edit &&
+			!$s_cannot_edit_time &&
+			!$s_cannot_edit_locked
+		)));
+		$quote_allowed = $auth->acl_get('m_edit', $forum_id) || ($topic_data['topic_status'] != ITEM_LOCKED &&
+			($user->data['user_id'] == ANONYMOUS || $auth->acl_get('f_reply', $forum_id))
+		);
+		$quote_allowed = ($quote_allowed && $row['post_visibility'] == ITEM_APPROVED) ? true : false;
+		$delete_allowed = $force_delete_allowed || ($user->data['is_registered'] && (
+			($auth->acl_get('m_delete', $forum_id) || ($auth->acl_get('m_softdelete', $forum_id) && $row['post_visibility'] != ITEM_DELETED)) ||
+			(!$s_cannot_delete && !$s_cannot_delete_lastpost && !$s_cannot_delete_time && !$s_cannot_delete_locked)
+		));
+		
+		$softdelete_allowed = $force_softdelete_allowed || (($auth->acl_get('m_softdelete', $forum_id) ||
+		($auth->acl_get('f_softdelete', $forum_id) && $user->data['user_id'] == $poster_id)) && ($row['post_visibility'] != ITEM_DELETED));
+
+		$permanent_delete_allowed = $force_delete_allowed || ($auth->acl_get('m_delete', $forum_id) ||
+		($auth->acl_get('f_delete', $forum_id) && $user->data['user_id'] == $poster_id));
+		
+		$u_pm = '';
+
+		if ($config['allow_privmsg'] && $auth->acl_get('u_sendpm') /*&& $can_receive_pm*/)
+		{
+			$u_pm = append_sid("{$phpbb_root_path}ucp.$phpEx", 'i=pm&amp;mode=compose&amp;action=quotepost&amp;p=' . $row['post_id']);
+		}
+		if (!empty($attachments[$row['post_id']]) && !$forum_data['IsPaintBoard'])
+		{
+			parse_attachments($forum_id, $message, $attachments[$row['post_id']], $update_count);
+		}
+		// Was a highlight request part of the URI?
+		$highlight_match = $highlight = '';
+		$hilit_words	= $request->variable('hilit', '', true);
+		if ($hilit_words)
+		{
+			$highlight_match = phpbb_clean_search_string($hilit_words);
+			$highlight = urlencode($highlight_match);
+			$highlight_match = str_replace('\*', '\w+?', preg_quote($highlight_match, '#'));
+			$highlight_match = preg_replace('#(?<=^|\s)\\\\w\*\?(?=\s|$)#', '\w+?', $highlight_match);
+			$highlight_match = str_replace(' ', '|', $highlight_match);
+		}
+
+		// Editing information
+		if (($row['post_edit_count'] && $config['display_last_edited']) || $row['post_edit_reason'])
+		{
+			// Get usernames for all following posts if not already stored
+			if (!count($post_edit_list) && ($row['post_edit_reason'] || ($row['post_edit_user'] && !isset($user_cache[$row['post_edit_user']]))))
+			{
+				// Remove all post_ids already parsed (we do not have to check them)
+				$post_storage_list = (!$store_reverse) ? array_slice($post_list, $i) : array_slice(array_reverse($post_list), $i);
+
+				$sql = 'SELECT DISTINCT u.user_id, u.username, u.user_colour
+					FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
+					WHERE ' . $db->sql_in_set('p.post_id', $post_storage_list) . '
+						AND p.post_edit_count <> 0
+						AND p.post_edit_user <> 0
+						AND p.post_edit_user = u.user_id';
+				$result2 = $db->sql_query($sql);
+				while ($user_edit_row = $db->sql_fetchrow($result2))
+				{
+					$post_edit_list[$user_edit_row['user_id']] = $user_edit_row;
+				}
+				$db->sql_freeresult($result2);
+
+				unset($post_storage_list);
+			}
+
+			if ($row['post_edit_reason'])
+			{
+				// User having edited the post also being the post author?
+				if (!$row['post_edit_user'] || $row['post_edit_user'] == $poster_id)
+				{
+					$display_username = get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']);
+				}
+				else
+				{
+					$display_username = get_username_string('full', $row['post_edit_user'], $post_edit_list[$row['post_edit_user']]['username'], $post_edit_list[$row['post_edit_user']]['user_colour']);
+				}
+
+				$l_edited_by = $user->lang('EDITED_TIMES_TOTAL', (int) $row['post_edit_count'], $display_username, $user->format_date($row['post_edit_time'], false, true));
+			}
+			else
+			{
+				if ($row['post_edit_user'] && !isset($user_cache[$row['post_edit_user']]))
+				{
+					$user_cache[$row['post_edit_user']] = $post_edit_list[$row['post_edit_user']];
+				}
+
+				// User having edited the post also being the post author?
+				if (!$row['post_edit_user'] || $row['post_edit_user'] == $poster_id)
+				{
+					$display_username = get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']);
+				}
+				else
+				{
+					$display_username = get_username_string('full', $row['post_edit_user'], $user_cache[$row['post_edit_user']]['username'], $user_cache[$row['post_edit_user']]['user_colour']);
+				}
+
+				$l_edited_by = $user->lang('EDITED_TIMES_TOTAL', (int) $row['post_edit_count'], $display_username, $user->format_date($row['post_edit_time'], false, true));
+			}
+		}
+		else
+		{
+			$l_edited_by = '';
+		}
+		// Deleting information
+		if ($row['post_visibility'] == ITEM_DELETED && $row['post_delete_user'])
+		{
+			// Get usernames for all following posts if not already stored
+			if (!count($post_delete_list) && ($row['post_delete_reason'] || ($row['post_delete_user'] && !isset($user_cache[$row['post_delete_user']]))))
+			{
+				// Remove all post_ids already parsed (we do not have to check them)
+				$post_storage_list = (!$store_reverse) ? array_slice($post_list, $i) : array_slice(array_reverse($post_list), $i);
+
+				$sql = 'SELECT DISTINCT u.user_id, u.username, u.user_colour
+					FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
+					WHERE ' . $db->sql_in_set('p.post_id', $post_storage_list) . '
+						AND p.post_delete_user <> 0
+						AND p.post_delete_user = u.user_id';
+				$result2 = $db->sql_query($sql);
+				while ($user_delete_row = $db->sql_fetchrow($result2))
+				{
+					$post_delete_list[$user_delete_row['user_id']] = $user_delete_row;
+				}
+				$db->sql_freeresult($result2);
+
+				unset($post_storage_list);
+			}
+
+			if ($row['post_delete_user'] && !isset($user_cache[$row['post_delete_user']]))
+			{
+				$user_cache[$row['post_delete_user']] = $post_delete_list[$row['post_delete_user']];
+			}
+
+			$display_postername = get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']);
+
+			// User having deleted the post also being the post author?
+			if (!$row['post_delete_user'] || $row['post_delete_user'] == $poster_id)
+			{
+				$display_username = $display_postername;
+			}
+			else
+			{
+				$display_username = get_username_string('full', $row['post_delete_user'], $user_cache[$row['post_delete_user']]['username'], $user_cache[$row['post_delete_user']]['user_colour']);
+			}
+
+			if ($row['post_delete_reason'])
+			{
+				$l_deleted_message = $user->lang('POST_DELETED_BY_REASON', $display_postername, $display_username, $user->format_date($row['post_delete_time'], false, true), $row['post_delete_reason']);
+			}
+			else
+			{
+				$l_deleted_message = $user->lang('POST_DELETED_BY', $display_postername, $display_username, $user->format_date($row['post_delete_time'], false, true));
+			}
+			$l_deleted_by = $user->lang('DELETED_INFORMATION', $display_username, $user->format_date($row['post_delete_time'], false, true));
+		}
+		else
+		{
+			$l_deleted_by = $l_deleted_message = '';
+		}
+
+		// Bump information
+		if ($topic_data['topic_bumped'] && $row['post_id'] == $topic_data['topic_last_post_id'] && isset($user_cache[$topic_data['topic_bumper']]) )
+		{
+			// It is safe to grab the username from the user cache array, we are at the last
+			// post and only the topic poster and last poster are allowed to bump.
+			// Admins and mods are bound to the above rules too...
+			$l_bumped_by = sprintf($user->lang['BUMPED_BY'], $user_cache[$topic_data['topic_bumper']]['username'], $user->format_date($topic_data['topic_last_post_time'], false, true));
+		}
+		else
+		{
+			$l_bumped_by = '';
+		}
+	
+		// General Viewtopic URL for return links
+		$viewtopic_url = append_sid("{$phpbb_root_path}viewtopic.$phpEx", "t=$topic_id" . (($start == 0) ? '' : "&amp;start=$start") . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : '') . (($highlight_match) ? "&amp;hilit=$highlight" : ''));
+
+
+		$post_t_Data[$row['topic_id']][]= array(
+			'POST_AUTHOR_FULL'		=> ($poster_id != ANONYMOUS) ? $user_cache[$poster_id]['author_full'] : get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
+			'POST_AUTHOR_COLOUR'	=> ($poster_id != ANONYMOUS) ? $user_cache[$poster_id]['author_colour'] : get_username_string('colour', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
+			'POST_AUTHOR'			=> ($poster_id != ANONYMOUS) ? $user_cache[$poster_id]['author_username'] : get_username_string('username', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
+			'U_POST_AUTHOR'			=> ($poster_id != ANONYMOUS) ? $user_cache[$poster_id]['author_profile'] : get_username_string('profile', $poster_id, $row['username'], $row['user_colour'], $row['post_username']),
+
+			'RANK_TITLE'		=> $user_cache[$poster_id]['rank_title'],
+			'RANK_IMG'			=> $user_cache[$poster_id]['rank_image'],
+			'RANK_IMG_SRC'		=> $user_cache[$poster_id]['rank_image_src'],
+			'POSTER_JOINED'		=> $user_cache[$poster_id]['joined'],
+			'POSTER_POSTS'		=> $user_cache[$poster_id]['posts'],
+			'POSTER_AVATAR'		=> $user_cache[$poster_id]['avatar'],
+			'POSTER_WARNINGS'	=> $auth->acl_get('m_warn') ? $user_cache[$poster_id]['warnings'] : '',
+			'POSTER_AGE'		=> $user_cache[$poster_id]['age'],
+			'CONTACT_USER'		=> $user_cache[$poster_id]['contact_user'],
+
+			'POST_DATE'			=> $user->format_date($row['post_time'], false, ($view == 'print') ? true : false),
+			'POST_DATE_RFC3339'	=> gmdate(DATE_RFC3339, $row['post_time']),
+			'POST_SUBJECT'		=> $row['post_subject'],
+			'MESSAGE'			=> $message,
+			'SIGNATURE'			=> ($row['enable_sig']) ? $user_cache[$poster_id]['sig'] : '',
+			'EDITED_MESSAGE'	=> $l_edited_by,
+			'EDIT_REASON'		=> $row['post_edit_reason'],
+			'DELETED_MESSAGE'	=> $l_deleted_by,
+			'DELETE_REASON'		=> $row['post_delete_reason'],
+			'BUMPED_MESSAGE'	=> $l_bumped_by,
+
+			'MINI_POST_IMG'			=> ($post_unread) ? $user->img('icon_post_target_unread', 'UNREAD_POST') : $user->img('icon_post_target', 'POST'),
+			'POST_ICON_IMG'			=> ($forum_data['enable_icons'] && !empty($row['icon_id'])) ? $icons[$row['icon_id']]['img'] : '',
+			'POST_ICON_IMG_WIDTH'	=> ($forum_data['enable_icons'] && !empty($row['icon_id'])) ? $icons[$row['icon_id']]['width'] : '',
+			'POST_ICON_IMG_HEIGHT'	=> ($forum_data['enable_icons'] && !empty($row['icon_id'])) ? $icons[$row['icon_id']]['height'] : '',
+			'POST_ICON_IMG_ALT' 	=> ($forum_data['enable_icons'] && !empty($row['icon_id'])) ? $icons[$row['icon_id']]['alt'] : '',
+			'ONLINE_IMG'			=> ($poster_id == ANONYMOUS || !$config['load_onlinetrack']) ? '' : (($user_cache[$poster_id]['online']) ? $user->img('icon_user_online', 'ONLINE') : $user->img('icon_user_offline', 'OFFLINE')),
+			'S_ONLINE'				=> ($poster_id == ANONYMOUS || !$config['load_onlinetrack']) ? false : (($user_cache[$poster_id]['online']) ? true : false),
+
+			'U_EDIT'			=> ($edit_allowed) ? append_sid("{$phpbb_root_path}posting.$phpEx", "mode=edit&amp;p={$row['post_id']}") : '',
+			'U_QUOTE'			=> ($quote_allowed) ? append_sid("{$phpbb_root_path}posting.$phpEx", "mode=quote&amp;p={$row['post_id']}") : '',
+			'U_INFO'			=> ($auth->acl_get('m_info', $forum_id)) ? append_sid("{$phpbb_root_path}mcp.$phpEx", "i=main&amp;mode=post_details&amp;p=" . $row['post_id'], true, $user->session_id) : '',
+			'U_DELETE'			=> ($delete_allowed) ? append_sid("{$phpbb_root_path}posting.$phpEx", 'mode=' . (($softdelete_allowed) ? 'soft_delete' : 'delete') . "&amp;p={$row['post_id']}") : '',
+
+			'U_SEARCH'		=> $user_cache[$poster_id]['search'],
+			'U_PM'			=> $u_pm,
+			'U_EMAIL'		=> $user_cache[$poster_id]['email'],
+			'U_JABBER'		=> $user_cache[$poster_id]['jabber'],
+
+			'U_APPROVE_ACTION'		=> append_sid("{$phpbb_root_path}mcp.$phpEx", "i=queue&amp;p={$row['post_id']}&amp;redirect=" . urlencode(str_replace('&amp;', '&', $viewtopic_url . '&amp;p=' . $row['post_id'] . '#p' . $row['post_id']))),
+			'U_REPORT'			=> ($auth->acl_get('f_report', $forum_id)) ? $phpbb_container->get('controller.helper')->route('phpbb_report_post_controller', array('id' => $row['post_id'])) : '',
+			'U_MCP_REPORT'		=> ($auth->acl_get('m_report', $forum_id)) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=reports&amp;mode=report_details&amp;p=' . $row['post_id'], true, $user->session_id) : '',
+			'U_MCP_APPROVE'		=> ($auth->acl_get('m_approve', $forum_id)) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=queue&amp;mode=approve_details&amp;p=' . $row['post_id'], true, $user->session_id) : '',
+			'U_MCP_RESTORE'		=> ($auth->acl_get('m_approve', $forum_id)) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=queue&amp;mode=' . (($topic_data['topic_visibility'] != ITEM_DELETED) ? 'deleted_posts' : 'deleted_topics') . '&amp;p=' . $row['post_id'], true, $user->session_id) : '',
+			'U_MINI_POST'		=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", 'p=' . $row['post_id']) . '#p' . $row['post_id'],
+			'U_MINI_POST_VIEW'	=> append_sid("{$phpbb_root_path}viewtopic.$phpEx", 'p=' . $row['post_id']) . '&amp;view=show#p' . $row['post_id'],
+			//'U_NEXT_POST_ID'	=> ($i < $i_total && isset($rowset[$post_list[$i + 1]])) ? $rowset[$post_list[$i + 1]]['post_id'] : '',
+			//'U_PREV_POST_ID'	=> $prev_post_id,
+			'U_NOTES'			=> ($auth->acl_getf_global('m_')) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=notes&amp;mode=user_notes&amp;u=' . $poster_id, true, $user->session_id) : '',
+			'U_WARN'			=> ($auth->acl_get('m_warn') && $poster_id != $user->data['user_id'] && $poster_id != ANONYMOUS) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=warn&amp;mode=warn_post&amp;p=' . $row['post_id'], true, $user->session_id) : '',
+
+			'POST_ID'			=> $row['post_id'],
+			//'POST_NUMBER'		=> $i + $start + 1,
+			'POSTER_ID'			=> $poster_id,
+			'MINI_POST'			=> ($post_unread) ? $user->lang['UNREAD_POST'] : $user->lang['POST'],
+
+
+			'S_HAS_ATTACHMENTS'	=> (!empty($attachments[$row['post_id']])) ? true : false,
+			'S_MULTIPLE_ATTACHMENTS'	=> !empty($attachments[$row['post_id']]) && count($attachments[$row['post_id']]) > 1,
+			'S_POST_UNAPPROVED'	=> ($row['post_visibility'] == ITEM_UNAPPROVED || $row['post_visibility'] == ITEM_REAPPROVE) ? true : false,
+			'S_CAN_APPROVE'		=> $auth->acl_get('m_approve', $forum_id),
+			'S_POST_DELETED'	=> ($row['post_visibility'] == ITEM_DELETED) ? true : false,
+			'L_POST_DELETED_MESSAGE'	=> $l_deleted_message,
+			'S_POST_REPORTED'	=> ($row['post_reported'] && $auth->acl_get('m_report', $forum_id)) ? true : false,
+			//'S_DISPLAY_NOTICE'	=> $display_notice && $row['post_attachment'],
+			'S_FRIEND'			=> ($row['friend']) ? true : false,
+			'S_UNREAD_POST'		=> $post_unread,
+			//'S_FIRST_UNREAD'	=> $s_first_unread,
+			'S_CUSTOM_FIELDS'	=> (isset($cp_row['row']) && count($cp_row['row'])) ? true : false,
+			'S_TOPIC_POSTER'	=> ($topic_data['topic_poster'] == $poster_id) ? true : false,
+			'S_FIRST_POST'		=> ($topic_data['topic_first_post_id'] == $row['post_id']) ? true : false,
+
+			'S_IGNORE_POST'		=> ($row['foe']) ? true : false,
+			'L_IGNORE_POST'		=> ($row['foe']) ? sprintf($user->lang['POST_BY_FOE'], get_username_string('full', $poster_id, $row['username'], $row['user_colour'], $row['post_username'])) : '',
+			'S_POST_HIDDEN'		=> $rowset_data['hide_post'],
+			'S_DELETE_PERMANENT'	=> $permanent_delete_allowed,
+			
+			//'user_poster_data'	=>	$user_cache[$poster_id],
+		); 
+		if (in_array($row['post_id'],$FirstPostList))
+		{
+			$FirstPostText[$row['topic_id']]=$message;
+		}
+		//$user_poster_data = $user_cache[$poster_id];
+
+		//$current_row_number = $i;
+	}
+}
+
+#
+#-----[ FIND ]------------------------------------------
+# 
+
+$u_mcp_queue = (!$u_mcp_queue && $topic_deleted) ? append_sid("{$phpbb_root_path}mcp.$phpEx", 'i=queue&amp;mode=deleted_topics&amp;t=' . $topic_id, true, $user->session_id) : $u_mcp_queue;
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+		//Paintbbs
+
+		$PicID=NULL;
+		$AnimID=NULL;
+		$ePname='';
+		$eAname='';
+		$dtime=0;
+		$D = 0;	
+		$H = 0;	
+		$M = 0;	
+		$S = 0;	
+		if ($forum_data['IsPaintBoard'])
+		{			
+			if (isset($attachments[$row['topic_first_post_id']])){
+				foreach ($attachments[$row['topic_first_post_id']] as $attach_row)
+				{
+					if (in_array($attach_row['extension'],array('jpg','jpeg','png')))
+					{
+						$PicID=$attach_row['attach_id'];
+						$ePname=$attach_row['physical_filename'];
+						$dtime=intval($attach_row['attach_comment']);
+						// Get time
+						
+						$D = floor($dtime / 86400);
+						$H = floor($dtime % 86400 / 3600);
+						$M = floor($dtime % 3600 / 60);
+						$S = $dtime % 60;					
+					}	
+					if (in_array($attach_row['extension'],array('pch','spch')))
+					{
+						$AnimID=$attach_row['attach_id'];
+						$eAname=$attach_row['physical_filename'];
+					}
+				}	
+			}
+		}
+
+		// let's set up quick_reply
+		$s_quick_reply = false;
+		if ($user->data['is_registered'] && $config['allow_quick_reply'] && ($forum_data['forum_flags'] & FORUM_FLAG_QUICK_REPLY) && $auth->acl_get('f_reply', $forum_id))
+		{
+			// Quick reply enabled forum
+			$s_quick_reply = (($forum_data['forum_status'] == ITEM_UNLOCKED && $row['topic_status'] == ITEM_UNLOCKED) || $auth->acl_get('m_edit', $forum_id)) ? true : false;
+		}
+		
+		add_form_key('posting');
+		$s_watching_topic = array(
+			'link'			=> '',
+			'link_toggle'	=> '',
+			'title'			=> '',
+			'title_toggle'	=> '',
+			'is_watching'	=> false,
+		);
+		$notify_status = (isset($topic_data['notify_status'])) ? $row['notify_status'] : null;
+		watch_topic_forum('topic', $s_watching_topic, $user->data['user_id'], $forum_id, $topic_id, $notify_status, $start, $row['topic_title']);
+		$qr_hidden_fields='';
+		if ($s_quick_reply)
+		{
+			$s_attach_sig	= $config['allow_sig'] && $user->optionget('attachsig') && $auth->acl_get('f_sigs', $forum_id) && $auth->acl_get('u_sig');
+			$s_smilies		= $config['allow_smilies'] && $user->optionget('smilies') && $auth->acl_get('f_smilies', $forum_id);
+			$s_bbcode		= $config['allow_bbcode'] && $user->optionget('bbcode') && $auth->acl_get('f_bbcode', $forum_id);
+			$s_notify		= $config['allow_topic_notify'] && ($user->data['user_notify'] || $s_watching_topic['is_watching']);
+
+			$qr_hidden_fields = array(
+				'topic_cur_post_id'		=> (int) $row['topic_last_post_id'],
+				'topic_id'				=> (int) $row['topic_id'],
+				'forum_id'				=> (int) $forum_id,
+				'Paintbbs'				=> (int) 1,
+			);
+
+			// Originally we use checkboxes and check with isset(), so we only provide them if they would be checked
+			(!$s_bbcode)					? $qr_hidden_fields['disable_bbcode'] = 1		: true;
+			(!$s_smilies)					? $qr_hidden_fields['disable_smilies'] = 1		: true;
+			(!$config['allow_post_links'])	? $qr_hidden_fields['disable_magic_url'] = 1	: true;
+			($s_attach_sig)					? $qr_hidden_fields['attach_sig'] = 1			: true;
+			($s_notify)						? $qr_hidden_fields['notify'] = 1				: true;
+			($row['topic_status'] == ITEM_LOCKED) ? $qr_hidden_fields['lock_topic'] = 1 : true;
+		}
+
+#
+#-----[ FIND ]------------------------------------------
+# 
+
+'S_TOPIC_TYPE_SWITCH'	=> ($s_type_switch == $s_type_switch_test) ? -1 : $s_type_switch_test,
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+			'PicURL'				=> append_sid("{$phpbb_root_path}download/file.$phpEx", "id=$PicID"),
+			'AnimURL'				=> append_sid("{$phpbb_root_path}download/file.$phpEx", "id=$AnimID"),
+			'PicID'					=> $PicID,
+			'AnimID'					=> $AnimID,
+			'ViewAnimURL'				=> append_sid("{$phpbb_root_path}paintbook.$phpEx", "animid=$AnimID&picid=$PicID".'&amp;f=' . $row['forum_id']),
+			'EditURL'				=> append_sid("{$phpbb_root_path}paintbook.$phpEx", "mode=edit&amp;dtime=$dtime&amp;epname=$ePname&amp;eaname=$eAname&amp;anid=$AnimID&amp;picid=$PicID&amp;f=$forum_id" . ((strlen($u_sort_param)) ? "&amp;$u_sort_param" : '') . (($start == 0) ? '' : "&amp;start=$start")),
+			'MaxDispWidth'			=> $forum_data['DispWidth'],
+			'PaintDay'				=> $D,
+			'PaintHour'				=> $H,
+			'PaintMinute'				=> $M,
+			'PaintSecond'				=> $S,
+			'S_QUICK_REPLY'			=> $s_quick_reply,
+			'U_QR_ACTION'			=> append_sid("{$phpbb_root_path}posting.$phpEx", "mode=reply&amp;Paintbbs=1&amp;t=$topic_id"),
+			'QR_HIDDEN_FIELDS'		=> ($s_quick_reply)?build_hidden_fields($qr_hidden_fields):'',
+			'SUBJECT'				=> 'Re: ' . censor_text($row['topic_title']),
+			'FIRST_POST_MSG'		=> isset($FirstPostText[$row['topic_id']])?$FirstPostText[$row['topic_id']]:'',
+
+#
+#-----[ FIND ]------------------------------------------
+# 
+
+extract($phpbb_dispatcher->trigger_event('core.viewforum_topic_row_after', compact($vars)));
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+		/**
+		* Modify the posts template block
+		*
+		* @event core.viewtopic_modify_post_row
+		* @var	int		start				Start item of this page
+		* @var	int		current_row_number	Number of the post on this page
+		* @var	int		end					Number of posts on this page
+		* @var	int		total_posts			Total posts count
+		* @var	int		poster_id			Post author id
+		* @var	array	row					Array with original post and user data
+		* @var	array	cp_row				Custom profile field data of the poster
+		* @var	array	attachments			List of attachments
+		* @var	array	user_poster_data	Poster's data from user cache
+		* @var	array	post_row			Template block array of the post
+		* @var	array	topic_data			Array with topic data
+		* @var	array	user_cache			Array with cached user data
+		* @var	array	post_edit_list		Array with post edited list
+		* @since 3.1.0-a1
+		* @changed 3.1.0-a3 Added vars start, current_row_number, end, attachments
+		* @changed 3.1.0-b3 Added topic_data array, total_posts
+		* @changed 3.1.0-RC3 Added poster_id
+		* @changed 3.2.2-RC1 Added user_cache and post_edit_list
+		*/		
+		if ($EnablePostView==1)
+		{
+			$first=1;
+			$maxpostpertopic=$forum_data['MaxPostPerTopic'];
+			$newest=$forum_data['DisplayNewestPost'];
+			$count = 0;
+			$numposts=count($post_t_Data[$topic_id]);
+			foreach ($post_t_Data[$topic_id] as $post_row)
+			{
+				$count +=1;
+				if ($count == 1 || ($newest==true && $count > ($numposts-$maxpostpertopic))|| ($newest==false && $count <= (1+$maxpostpertopic)))
+				{
+					if ($first==1)
+					{
+						$post_row['First']=True;
+						$first=0;
+					}else{
+						$post_row['First']=False;
+					}
+					$vars = array(
+						'start',
+						'current_row_number',
+						'end',
+						'total_posts',
+						'poster_id',
+						'row',
+						'cp_row',
+						'attachments',
+						'user_poster_data',
+						'post_row',
+						'topic_data',
+						'user_cache',
+						'post_edit_list',
+					);
+				//extract($phpbb_dispatcher->trigger_event('core.viewtopic_modify_post_row', compact($vars)));
+
+				//$i = $current_row_number;
+
+					if (isset($cp_row['row']) && count($cp_row['row']))
+					{
+						$post_row = array_merge($post_row, $cp_row['row']);
+					}
+					
+					// Dump vars into template
+					
+					$template->assign_block_vars('topicrow.postrow', $post_row);
+				}
+			}
+		}
+#
+#-----[ OPEN ]------------------------------------------
+#
+posting.php
+
+#
+#-----[ FIND ]------------------------------------------
+# 
+$data = array(
+#
+#-----[ BEFORE, ADD]--------------------------------------
+#
+			//PaintBoard Files
+			if ($request->variable('pname', '')!=Null)
+			{
+				$PaintNames='';
+				if ($request->variable('pname', '')!=Null)
+				{
+					$PaintNames.="'".$request->variable('pname', '')."'";
+				}
+				if ($request->variable('PchName', '')!=Null)
+				{
+					$PaintNames.=",'".$request->variable('PchName', '')."'";
+				}
+				// Do not change to SELECT *
+				$sql = 'SELECT attach_id, is_orphan, attach_comment, real_filename, filesize
+					FROM ' . ATTACHMENTS_TABLE . "
+					WHERE physical_filename in (".$PaintNames.")
+						AND in_message = 0
+					ORDER BY attach_id DESC";
+				$result = $db->sql_query($sql);
+				$message_parser->attachment_data = array_merge($message_parser->attachment_data, $db->sql_fetchrowset($result));
+				$db->sql_freeresult($result);
+			}
+
+
+#
+#-----[ FIND ]------------------------------------------
+# 
+redirect($redirect_url);
+
+#
+#-----[ BEFORE, ADD]--------------------------------------
+#
+
+			if ($request->variable('Paintbbs', '')=='1')
+			{
+				$redirect_url = ($forum_id) ? append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_id) :
+								(($topic_id) ? append_sid("{$phpbb_root_path}viewtopic.$phpEx", 't=' . $topic_id) : 
+								(($post_id) ? append_sid("{$phpbb_root_path}viewtopic.$phpEx", 'p=' . $post_id) . '#p' . $post_id : append_sid("{$phpbb_root_path}index.$phpEx")));
+			}
+			if ($request->variable('spflag', ''))
+			{
+				switch ($request->variable('spflag', ''))
+				{
+					case 'topicpost':
+						$redirect_url = ($forum_id) ? append_sid("{$phpbb_root_path}viewforum.$phpEx", 'f=' . $forum_id) :
+										(($topic_id) ? append_sid("{$phpbb_root_path}viewtopic.$phpEx", 't=' . $topic_id) : 
+										(($post_id) ? append_sid("{$phpbb_root_path}viewtopic.$phpEx", 'p=' . $post_id) . '#p' . $post_id : append_sid("{$phpbb_root_path}index.$phpEx")));
+					break;
+				}
+			}
+
+#
+#-----[ FIND ]------------------------------------------
+#  
+
+$s_action = append_sid("{$phpbb_root_path}posting.$phpEx", "mode=$mode");
+
+#
+#-----[ REPLACE WITH ]------------------------------------------
+#
+
+if ($request->variable('Paintbbs', '')=='1')
+{
+	$NewAction='';
+	if ($request->variable('pname', '')!=Null)
+	{
+		$NewAction.='&amp;pname='.$request->variable('pname', '');
+	}
+	if ($request->variable('PchName', '')!=Null)
+	{
+		$NewAction.='&amp;PchName='.$request->variable('PchName', '');
+	}
+	$s_action = append_sid("{$phpbb_root_path}posting.$phpEx", "Paintbbs=1".$NewAction."&amp;mode=$mode");
+}
+elseif ($request->variable('spflag', ''))
+{
+	$s_action = append_sid("{$phpbb_root_path}posting.$phpEx", "spflag=topicpost&amp;mode=$mode");
+}
+else
+{
+	$s_action = append_sid("{$phpbb_root_path}posting.$phpEx", "mode=$mode");
+}
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+
+viewforum_body.html
+
+#
+#-----[ FIND ]------------------------------------------
+#
+<!-- EVENT viewforum_buttons_top_before -->
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+<!-- IF S_PAINTBBS -->
+<form action="{S_PAINTBBSAction}" method="post" enctype="multipart/form-data">
+<p><p>
+<table><tr><td>
+{L_PaintBBS_Height} :<input name="picw" type="number" title="Width :" class="form" value="{S_DefaultPicWidth}" min="{S_MinPicWidth}" max="{S_MaxPicWidth}">
+{L_PaintBBS_Width} :<input name="pich" type="number" title="Height" class="form" value="{S_DefaultPicHeight}" min="{S_MinPicHeight}" max="{S_MaxPicHeight}">
+{L_PaintBBS_Tool}:
+<select name="shi"><option value="normal" class="for_pc">{L_ShiPainter}</option>
+<option value="pro" class="for_pc">{L_ShiPainterPro}</option></select>
+<!-- IF S_AllowAnimation -->
+<label><input type="checkbox" value="true" name="anime" title="Save Playback"  checked>{L_SavePlayback}</label> 
+<!-- ENDIF -->
+<input type="hidden" name="mode" value="paint">
+<input type="hidden" name="mode" value="{U_POST_NEW_TOPIC}"></td><td>
+<input class="button" type="submit" value="{L_Paint}"></td></tr></table>
+</p>
+</form>
+<!-- ELSE -->
+		<!-- IF S_ReplyRedirect and S_TopicPostView -->
+			<a href="{U_POST_NEW_TOPICPOST}" class="button" title="<!-- IF S_IS_LOCKED -->{L_FORUM_LOCKED}<!-- ELSE -->{L_POST_TOPIC}<!-- ENDIF -->">
+		<!-- ELSE -->
+		
+#
+#-----[ FIND ]---------------------------------------------
+# 
+<a href="{U_POST_NEW_TOPIC}" class="button" title="<!-- IF S_IS_LOCKED -->{L_FORUM_LOCKED}<!-- ELSE -->{L_POST_TOPIC}<!-- ENDIF -->">
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+		<!-- ENDIF -->
+
+#
+#-----[ FIND ]---------------------------------------------
+# 
+
+<!-- EVENT viewforum_buttons_top_after -->
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+<!-- ENDIF -->
+
+#
+#-----[ FIND ]---------------------------------------------
+# 
+<li class="header">
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+<!-- IF not S_TopicPostView -->
+
+#
+#-----[ FIND ]---------------------------------------------
+# 
+					<dd class="lastpost"><span>{L_LAST_POST}</span></dd>
+				</dl>
+				
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+				<!-- ENDIF -->
+
+#
+#-----[ FIND ]---------------------------------------------
+# 
+
+						<!-- EVENT topiclist_row_append -->
+					</div>
+
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+						<!-- IF S_TopicPostView -->
+						<p><hr><table> 
+								<tr><td align=left>
+								<!-- IF topicrow.PicID-->
+								<a href="{topicrow.PicURL}" target="blank"><img src="{topicrow.PicURL}" width={S_DispWidth}></a>
+									<p><center> {L_PaintTime} :							
+										<!-- IF topicrow.PaintDay-->
+											{topicrow.PaintDay}{L_day}&nbsp;
+										<!-- ENDIF -->
+										
+										<!-- IF topicrow.PaintHour-->
+											{topicrow.PaintHour}{L_hr}&nbsp;
+										<!-- ENDIF -->
+
+										<!-- IF topicrow.PaintMinute-->
+											{topicrow.PaintMinute}{L_min}&nbsp;
+										<!-- ENDIF -->
+
+										<!-- IF topicrow.PaintSecond-->
+											{topicrow.PaintSecond}{L_sec}&nbsp;
+										<!-- ENDIF -->	</center>									
+									<!-- IF topicrow.AnimID-->
+									<br><center><a href="{topicrow.ViewAnimURL}" target="blank">{L_ViewAnim}</a></center>
+									<!-- ENDIF -->
+								<br><center><a href="{topicrow.EditURL}">{L_Edit}</a></center>
+								<!-- ELSE -->
+								<img src="images/spacer.gif" width={S_PostTopicPadding_Width}">
+								<!-- ENDIF -->
+								</td><td></td>
+								<td></td><td style="vertical-align:top">
+								<table>
+							<!-- BEGIN topicrow.postrow -->
+								<tr><td>
+			<!-- IF not topicrow.postrow.First -->
+			<!-- IF topicrow.postrow.S_POST_HIDDEN -->
+				<!-- IF topicrow.postrow.S_POST_DELETED -->
+					<div class="ignore" id="post_hidden{topicrow.postrow.POST_ID}">
+						{topicrow.postrow.L_POST_DELETED_MESSAGE}<br>
+						<a class="display_post" data-post-id="{{ topicrow.postrow.POST_ID }}" href="{{ topicrow.postrow.U_MINI_POST_VIEW }}">{{ lang('POST_DISPLAY') }}</a>
+					</div>
+				<!-- ELSEIF topicrow.postrow.S_IGNORE_POST -->
+					<div class="ignore" id="post_hidden{topicrow.postrow.POST_ID}">
+						{topicrow.postrow.L_IGNORE_POST}<br>
+						<a class="display_post" data-post-id="{{ topicrow.postrow.POST_ID }}" href="{{ topicrow.postrow.U_MINI_POST_VIEW }}">{{ lang('POST_DISPLAY') }}</a>
+					</div>
+				<!-- ENDIF -->
+			<!-- ENDIF -->
+			<div id="post_content{topicrow.postrow.POST_ID}"<!-- IF topicrow.postrow.S_POST_HIDDEN --> style="display: none;"<!-- ENDIF -->>
+
+			<!-- EVENT viewtopic_body_post_subject_before -->
+		<h3 {% if topicrow.postrow.S_FIRST_ROW %}class="first"{% endif %}>
+			{% if topicrow.postrow.POST_ICON_IMG %}
+				<img src="{{ T_ICONS_PATH }}{{ topicrow.postrow.POST_ICON_IMG }}" width="{{ topicrow.postrow.POST_ICON_IMG_WIDTH }}" height="{{ topicrow.postrow.POST_ICON_IMG_HEIGHT }}" alt="{{ topicrow.postrow.POST_ICON_IMG_ALT }}" title="{{ topicrow.postrow.POST_ICON_IMG_ALT }}">
+			{% endif %}
+			<a {% if topicrow.postrow.S_FIRST_UNREAD %}class="first-unread" {% endif %}href="{{ topicrow.postrow.U_MINI_POST }}">{{ topicrow.postrow.POST_SUBJECT }}</a>
+		</h3>
+
+
+		<!-- EVENT viewtopic_body_post_buttons_list_after -->
+
+			<!-- EVENT viewtopic_body_postrow_post_details_before -->
+			<p class="author">
+				<!-- IF S_IS_BOT -->
+					<span><i class="icon fa-file fa-fw <!-- IF topicrow.postrow.S_UNREAD_POST -->icon-red<!-- ELSE -->icon-lightgray<!-- ENDIF --> icon-md" aria-hidden="true"></i><span class="sr-only">{topicrow.postrow.MINI_POST}</span></span>
+				<!-- ELSE -->
+					<a class="unread" href="{topicrow.postrow.U_MINI_POST}" title="{topicrow.postrow.MINI_POST}">
+						<i class="icon fa-file fa-fw <!-- IF topicrow.postrow.S_UNREAD_POST -->icon-red<!-- ELSE -->icon-lightgray<!-- ENDIF --> icon-md" aria-hidden="true"></i><span class="sr-only">{topicrow.postrow.MINI_POST}</span>
+					</a>
+				<!-- ENDIF -->
+				<span class="responsive-hide">{L_POST_BY_AUTHOR} <strong>{topicrow.postrow.POST_AUTHOR_FULL}</strong> &raquo; </span><time datetime="{topicrow.postrow.POST_DATE_RFC3339}">{topicrow.postrow.POST_DATE}</time>
+			</p>
+			<!-- EVENT viewtopic_body_postrow_post_details_after -->
+
+			<!-- IF topicrow.postrow.S_POST_UNAPPROVED -->
+			<!-- IF topicrow.postrow.S_CAN_APPROVE -->
+			<form method="post" class="mcp_approve" action="{topicrow.postrow.U_APPROVE_ACTION}">
+				<p class="post-notice unapproved">
+					<span><i class="icon fa-question icon-red fa-fw" aria-hidden="true"></i></span>
+					<strong>{L_POST_UNAPPROVED_ACTION}</strong>
+					<input class="button2" type="submit" value="{L_DISAPPROVE}" name="action[disapprove]" />
+					<input class="button1" type="submit" value="{L_APPROVE}" name="action[approve]" />
+					<input type="hidden" name="post_id_list[]" value="{topicrow.postrow.POST_ID}" />
+					{S_FORM_TOKEN}
+				</p>
+			</form>
+			<!-- ELSE -->
+				<p class="post-notice unapproved">
+					<span><i class="icon fa-exclamation icon-red fa-fw" aria-hidden="true"></i></span>
+					<strong>{L_POST_UNAPPROVED_EXPLAIN}</strong>
+				</p>
+			<!-- ENDIF -->
+			<!-- ELSEIF topicrow.postrow.S_POST_DELETED -->
+			<form method="post" class="mcp_approve" action="{topicrow.postrow.U_APPROVE_ACTION}">
+				<p class="post-notice deleted">
+					<strong>{L_POST_DELETED_ACTION}</strong>
+					<!-- IF topicrow.postrow.S_DELETE_PERMANENT -->
+						<input class="button2" type="submit" value="{L_DELETE}" name="action[delete]" />
+					<!-- ENDIF -->
+					<input class="button1" type="submit" value="{L_RESTORE}" name="action[restore]" />
+					<input type="hidden" name="post_id_list[]" value="{topicrow.postrow.POST_ID}" />
+					{S_FORM_TOKEN}
+				</p>
+			</form>
+			<!-- ENDIF -->
+
+			<!-- IF topicrow.postrow.S_POST_REPORTED -->
+			<p class="post-notice reported">
+				<a href="{topicrow.postrow.U_MCP_REPORT}"><i class="icon fa-exclamation fa-fw icon-red" aria-hidden="true"></i><strong>{L_POST_REPORTED}</strong></a>
+			</p>
+			<!-- ENDIF -->
+			<!-- ENDIF -->
+			<div class="content">{topicrow.postrow.MESSAGE}</div>
+
+			<!-- EVENT viewtopic_body_postrow_content_after -->
+
+		<!-- DEFINE $SHOW_POST_BUTTONS = (topicrow.postrow.U_EDIT or topicrow.postrow.U_DELETE or topicrow.postrow.U_REPORT or topicrow.postrow.U_WARN or topicrow.postrow.U_INFO or topicrow.postrow.U_QUOTE) -->
+		<!-- EVENT viewtopic_body_post_buttons_list_before -->
+		<!-- IF not S_IS_BOT -->
+			<!-- IF $SHOW_POST_BUTTONS -->
+				<ul class="post-buttons">
+					<!-- EVENT viewtopic_body_post_buttons_before -->
+					<!-- IF topicrow.postrow.U_EDIT -->
+						<li>
+							<a href="{topicrow.postrow.U_EDIT}" title="{L_EDIT_POST}" class="button button-icon-only">
+								<i class="icon fa-pencil fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BUTTON_EDIT}</span>
+							</a>
+						</li>
+					<!-- ENDIF -->
+					<!-- IF topicrow.postrow.U_DELETE -->
+						<li>
+							<a href="{topicrow.postrow.U_DELETE}" title="{L_DELETE_POST}" class="button button-icon-only">
+								<i class="icon fa-times fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BUTTON_DELETE}</span>
+							</a>
+						</li>
+					<!-- ENDIF -->
+					<!-- IF topicrow.postrow.U_REPORT -->
+						<li>
+							<a href="{topicrow.postrow.U_REPORT}" title="{L_REPORT_POST}" class="button button-icon-only">
+								<i class="icon fa-exclamation fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BUTTON_REPORT}</span>
+							</a>
+						</li>
+					<!-- ENDIF -->
+					<!-- IF topicrow.postrow.U_WARN -->
+						<li>
+							<a href="{topicrow.postrow.U_WARN}" title="{L_WARN_USER}" class="button button-icon-only">
+								<i class="icon fa-exclamation-triangle fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BUTTON_WARN}</span>
+							</a>
+						</li>
+					<!-- ENDIF -->
+					<!-- IF topicrow.postrow.U_INFO -->
+						<li>
+							<a href="{topicrow.postrow.U_INFO}" title="{L_INFORMATION}" class="button button-icon-only">
+								<i class="icon fa-info fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BUTTON_INFORMATION}</span>
+							</a>
+						</li>
+					<!-- ENDIF -->
+					<!-- IF topicrow.postrow.U_QUOTE -->
+						<li>
+							<a href="{topicrow.postrow.U_QUOTE}" title="{L_REPLY_WITH_QUOTE}" class="button button-icon-only">
+								<i class="icon fa-quote-left fa-fw" aria-hidden="true"></i><span class="sr-only">{L_BUTTON_QUOTE}</span>
+							</a>
+						</li>
+					<!-- ENDIF -->
+					<!-- EVENT viewtopic_body_post_buttons_after -->
+				</ul>
+			<!-- ENDIF -->
+		<!-- ENDIF -->
+								</td></tr>
+
+								
+								
+								
+							<!-- END topicrow.postrow -->
+							<!-- IF topicrow.S_QUICK_REPLY -->
+		<tr><td>
+		<form method="post" action="{topicrow.U_QR_ACTION}" id="qr_postform">
+<!-- EVENT quickreply_editor_panel_before -->
+	<div class="panel">
+		<div class="inner">
+				<h3 class="quickreply-title">{L_QUICKREPLY}</h2>
+				<fieldset class="fields1">
+				<!-- EVENT quickreply_editor_subject_before -->
+					<dl style="clear: left;">
+						<!--<dt><label for="subject">{L_SUBJECT}{L_COLON}</label></dt>-->
+						<dd><input type="hidden" name="subject" id="subject" size="45" maxlength="124" tabindex="2" value="{topicrow.SUBJECT}" class="inputbox autowidth" /></dd>
+					</dl>
+				<!-- EVENT quickreply_editor_message_before -->
+				<div id="message-box" class="message-box">
+					<textarea style="height: 4em;" name="message" rows="3" cols="176" tabindex="3" class="inputbox"></textarea>
+				</div>
+				<!-- EVENT quickreply_editor_message_after -->
+				</fieldset>
+				<fieldset class="submit-buttons">
+					{S_FORM_TOKEN}
+					{topicrow.QR_HIDDEN_FIELDS}
+					<input type="submit" accesskey="f" tabindex="6" name="preview" value="{L_FULL_EDITOR}" class="button2" id="qr_full_editor" />&nbsp;
+					<input type="submit" accesskey="s" tabindex="7" name="post" value="{L_SUBMIT}" class="button1" />&nbsp;
+				</fieldset>
+		</div>
+	</div>
+<!-- EVENT quickreply_editor_panel_after -->
+</form>
+
+</td></tr>
+<!-- ENDIF -->
+							</table>
+							</td></tr>
+						</table>
+						<!-- ENDIF -->
+
+
+#
+#-----[ FIND ]---------------------------------------------
+#
+
+<dd class="posts">{topicrow.REPLIES} <dfn>{L_REPLIES}</dfn></dd>
+
+#
+#-----[ BEFORE, ADD]--------------------------------------
+#
+
+				<!-- IF not S_TopicPostView -->
+
+#
+#-----[ FIND ]---------------------------------------------
+#
+
+			</dl>
+			<!-- EVENT viewforum_body_topic_row_append -->
+			
+#
+#-----[ BEFORE, ADD]--------------------------------------
+#
+
+				<!-- ENDIF -->
+
+#
+#-----[ OPEN ]------------------------------------------
+#
+language\en\viewforum.php
+
+#
+#-----[ FIND ]------------------------------------------
+#
+
+	'VIEW_FORUM_TOPICS'		=> array(
+		1	=> '%d topic',
+		2	=> '%d topics',
+	),
+	
+#
+#-----[ AFTER ADD]------------------------------------------
+#
+
+'paintboard'	=> 'PAINT MODE',
+'JSNOWORK'	=> 'JavaScript isn\'t working',
+'palette'	=> 'Palette',
+'savedpalette'	=> 'Save Pallette',
+'skin'	=> 'skin',
+'red'	=> 'red',
+'orange'	=> 'orange',
+'green'	=> 'green',
+'blue'	=> 'blue',
+'purple'	=> 'purple',
+'sepia'	=> 'sepia',
+'character'	=> 'character',
+'pastel'	=> 'pastel',
+'grass'	=> 'grass',
+'sakura'	=> 'sakura',
+'greyscale'	=> 'greyscale',
+'matrix'	=> 'matrix',
+'overall'	=> 'overall',
+'current'	=> 'current',
+'add'	=> 'add',
+'GRADATION'	=> 'GRADATION',
+'DynamicPalette'	=> 'Dynamic Palette',
+'PaintTime'	=> 'Paint Time',
+
+
+'PaintBBS_Error'	=> 'Error\n',
+'PaintBBS_Error0'	=> 'Wrong Starting Point',
+'PaintBBS_Error1'	=> 'No Data',
+'PaintBBS_Error2'	=> 'Picture Size Exceeded',
+'PaintBBS_Error3'	=> 'Please change to a new picture',
+'PaintBBS_Error4'	=> 'Please add more drawing steps',
+'PaintBBS_Error5'	=> 'Step',
+'PaintBBS_Error6'	=> 'Document is not saved',
+'PaintBBS_Error7'	=> 'Incorrect Format',
+'PaintBBS_Width'	=>'Width',
+'PaintBBS_Height'	=>'Height',
+'PaintBBS_Tool'	=>'Tool',
+'ShiPainter'	=>	'Shi-Painter',
+'ShiPainterPro'	=>	'Shi-Painter Pro',
+'SavePlayback'	=>	'Save Playback',
+'Paint'	=>	'Paint',
+'day'	=> 'day',
+'hr'	=> 'hr',
+'min'	=> 'min',
+'sec'	=> 'sec',
+'download'=>'Download',
+'close'=>'Close',
+'ViewAnim'=>'View Animation',
+'Edit'=>'Edit',
+'Import' => 'Import',
+'ImportPic' => 'Import Picture',
+'ImportPicU' =>  'Import Picture URL', 
+'ImportAnimU' => 'Import Animation URL',
+'Datasize'	=> 	'Datasize',
+'ImportMSG1'=>'Maximum Import Image Dimension : ',
+'ImportMSG2'=>'. Minimum Import Image Dimension : ',
+'ImportMSG3'=>'. Any images outside of this range will not be imported.',
+
+
+'painthelp' =><<<'HEREA'
+<p>
+ If you make a mistake and change the page or close the window, calm down and reopen the edit page with the same canvas width. Mostly left.
+ </p>
+ <h2>Basic function (At a minimum, the function you need to remember)</h2>
+ <h3>Basic</h3>
+ <p>
+ In PaintBBS, right-click, [Ctrl + click], and [Alt + click] have the same behavior.<br>
+ Basically, the operation is completed with a single click or Right-click. (Except when using Bezier or copy)
+ </p>
+ <h3>toolbar</h3>
+ <p>
+ Most buttons on the toolbar can be clicked multiple times to switch between functions.<br>
+ Right-click to reverse the order of function switching.
+ Use right-click to set palette colors, mask colors, and the current state of the pen tool.<br>
+ You can also right-click to switch the show / hide of the layer.<br>
+ Left-click to get the color and state of the palette saved in the pen save tool.
+ </p>
+ <h3>Canvas part</h3>
+ <p>
+ Right-click to pick up the color.<br>
+ </p>
+ <h2>Special function (Function that is not essential but useful to remember)</h2>
+ <h3>toolbar</h3>
+ <p>
+ As you move away from the bar while dragging, the bar's values change slowly, allowing you to make subtle changes.
+	Shift + click the palette to return the colors to their default state.
+ </p>
+ <h3>Keyboard shortcuts</h3>
+ <ul>
+ <li>[+] to zoom in [-] to zoom out.</li>
+ <li>Undo with [Ctrl + Z] or [Ctrl + U], redo with [Ctrl + Alt + Z] or [Ctrl + Y].</li>
+ <li>Copy and Bezier operations can be reset with [Esc]. (Same for right-clicking)</li>
+ <li>Free scrolling by dragging the canvas while holding down the space key.</li>
+ <li>Change the line width by [Ctrl + Alt + drag].</li>
+ </ul>
+ <h3>Special usage of copy tool</h3>
+ <p>
+ Use copy and merge layers to move between layers. To move by copying, first select the rectangle on the layer you want to move, then select the layer you want to move, and then continue the normal copy work. By doing so, you can move between layers.
+ </p>
+ <h2>A brief description of the toolbar buttons and special features</h2>
+ <dl>
+ <dt>Nib (normal pen, watercolor pen, text)</dt>
+ <dd>
+ Main freeline pen and text
+ </dd>
+ <dt>Nib 2 (halftone, blur, etc.)</dt>
+ <dd>
+ Freeline pen that produces special effects
+ </dd>
+ <dt>Shapes (circles and rectangles)</dt>
+ <dd>
+ Shapes such as rectangles and circles
+ </dd>
+ <dt>Special (copy, merge layers, flip, etc.)</dt>
+ <dd>
+ Copy is a tool that allows you to select, then drag, move, and copy.
+ </dd>
+ <dt>Mask mode specification (normal, mask, reverse mask)</dt>
+ <dd>
+ Masks the color set in the color mask. The reverse mask is the opposite.<br>
+ Normal is no mask. You can also change the mask color by right-clicking.
+ </dd>
+ <dt>Eraser (white, white rect , clear)</dt>
+ <dd>
+ If you fill the transparent layer with white, the lower layer will not be visible, Use this tool to erase lines in the upper layers.<br>
+ Clear is a tool that makes everything transparent pixels.<br>
+ If you want to clear all, select this tool and click on the canvas.
+ </dd>
+ <dt>Designation of drawing method (Freehand, straight line, Bezier curve)</dt>
+ <dd>
+ The pen tip and drawing function are not specified.<br>
+ And it applies only to freeline tools.
+ </dd>
+ <dt>Color palette group</dt>
+ <dd>
+ Click to get color. Right-click to set the color. Shift + click to default color.
+ </dd>
+ <dt>RGB bar and alpha bar</dt>
+ <dd>
+ Fine color changes and transparency changes. R is red, G is green, B is blue, and A is transparency.<br>
+ The density of the halftone can be changed by changing the value with the Alpha bar.
+ </dd>
+ <dt>Line width change tool</dt>
+ <dd>
+ When the line width is changed when the watercolor pen is selected, the default value is assigned to the alpha value.
+ </dd>
+ <dt>temporary pen save tool</dt>
+ <dd>
+ Left-click to get the data. Right-click to set the data. (Mask value is not set)
+ </dd>
+ <dt>Layer tool</dt>
+ <dd>
+ PaintBBS has a structure in which two transparent canvases are stacked.<br>
+ it is a tool that makes it possible to draw the main line on the top and the color on the bottom.<br>
+ Since it is a type of thing called a normal layer, Lines like those drawn with a pencil are also transparent.<br>
+ Click to switch layers. Right-click to switch the show / hide of the layer.
+ </dd>
+ </dl>
+ <h2>Regarding posting</h2>
+ <p>
+ When the picture is completed, post it with the send button. If the picture is posted successfully, it will jump to the specified URL. If it fails, it just reports the failure and does not jump anywhere.
+ If it was just heavy, please wait a moment and try posting again. <br>In this case, it may be posted twice. However, this is a web server or CGI processing issue.
+ </p>
+HEREA,
